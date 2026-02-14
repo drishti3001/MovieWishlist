@@ -4,265 +4,130 @@ import { useNavigate } from 'react-router-dom'
 function DashboardPage() {
   const navigate = useNavigate()
 
-  const [checkingAuth, setCheckingAuth] = useState(true)
   const [movies, setMovies] = useState([])
-  const [loadingMovies, setLoadingMovies] = useState(true)
-  const [error, setError] = useState(null)
+  const [watchlistIds, setWatchlistIds] = useState(new Set())
+  const [loading, setLoading] = useState(true)
 
-  // FORM STATE
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [year, setYear] = useState('')
-  const [genre, setGenre] = useState('')
-  const [status, setStatus] = useState('plan_to_watch')
-  const [rating, setRating] = useState('')
-  const [creating, setCreating] = useState(false)
-
-  // VERIFY AUTH
+  // ---------- AUTH + LOAD ----------
   useEffect(() => {
-    const verifyAuth = async () => {
-      const token = window.localStorage.getItem('token')
+    const token = localStorage.getItem('token')
+    if (!token) return navigate('/login')
 
-      if (!token) {
-        navigate('/login', { replace: true })
-        return
-      }
-
+    const load = async () => {
       try {
-        const response = await fetch('http://localhost:4000/protected', {
-          headers: { Authorization: `Bearer ${token}` },
+        // verify
+        await fetch('http://localhost:4000/protected', {
+          headers: { Authorization: `Bearer ${token}` }
         })
 
-        if (!response.ok) {
-          window.localStorage.removeItem('token')
-          navigate('/login', { replace: true })
-          return
-        }
+        // load movies
+        const m = await fetch('http://localhost:4000/movies', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const moviesData = await m.json()
+        setMovies(moviesData)
 
-        await fetchMovies(token)
+        // load watchlist
+        const w = await fetch('http://localhost:4000/watchlist', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const watchData = await w.json()
+
+        // IMPORTANT FIX
+        setWatchlistIds(new Set(watchData.map(item => item.movieId)))
 
       } catch {
-        window.localStorage.removeItem('token')
-        navigate('/login', { replace: true })
+        localStorage.removeItem('token')
+        navigate('/login')
       } finally {
-        setCheckingAuth(false)
+        setLoading(false)
       }
     }
 
-    verifyAuth()
+    load()
   }, [navigate])
 
-  // FETCH MOVIES
-  const fetchMovies = async (token) => {
-    try {
-      const response = await fetch('http://localhost:4000/items', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+  // ---------- TOGGLE ----------
+  const toggleWatchlist = async (movieId) => {
+    const token = localStorage.getItem('token')
 
-      if (!response.ok) throw new Error()
-
-      const data = await response.json()
-      setMovies(data)
-
-    } catch {
-      setError('Could not load movies')
-    } finally {
-      setLoadingMovies(false)
-    }
-  }
-
-  // CREATE MOVIE
-  const handleAddMovie = async (e) => {
-    e.preventDefault()
-
-    const token = window.localStorage.getItem('token')
-    if (!token) return
-
-    setCreating(true)
+    const exists = watchlistIds.has(movieId)
 
     try {
-      const response = await fetch('http://localhost:4000/items', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title,
-          description,
-          year: year ? Number(year) : undefined,
-          genre,
-          status,
-          rating: rating ? Number(rating) : undefined,
-        }),
-      })
+      if (exists) {
+        await fetch(`http://localhost:4000/watchlist/${movieId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        })
 
-      if (!response.ok) {
-        const err = await response.json()
-        alert(err.message || 'Failed to create movie')
-        return
+        setWatchlistIds(prev => {
+          const s = new Set(prev)
+          s.delete(movieId)
+          return s
+        })
+
+      } else {
+        await fetch(`http://localhost:4000/watchlist/${movieId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({})
+        })
+
+        setWatchlistIds(prev => new Set([...prev, movieId]))
       }
 
-      setTitle('')
-      setDescription('')
-      setYear('')
-      setGenre('')
-      setStatus('plan_to_watch')
-      setRating('')
-
-      await fetchMovies(token)
-
     } catch {
-      alert('Network error')
-    } finally {
-      setCreating(false)
+      alert('Failed')
     }
   }
 
-  // DELETE MOVIE
-  const handleDeleteMovie = async (id) => {
-    const token = window.localStorage.getItem('token')
-    if (!token) return
-
-    if (!window.confirm('Delete this movie?')) return
-
-    try {
-      const response = await fetch(`http://localhost:4000/items/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (!response.ok) {
-        alert('Failed to delete movie')
-        return
-      }
-
-      await fetchMovies(token)
-
-    } catch {
-      alert('Network error')
-    }
-  }
-
-  // UI STATES
-  if (checkingAuth) return <p>Checking authentication...</p>
-  if (loadingMovies) return <p>Loading your watchlist...</p>
-  if (error) return <p>{error}</p>
+  if (loading) return <p className="text-white p-10">Loading...</p>
 
   return (
-    <main className="min-h-screen bg-gray-900 text-gray-100 p-6">
-      <div className="max-w-4xl mx-auto">
+    <main className="min-h-screen bg-gray-900 text-white p-8">
 
-        <h1 className="text-4xl font-bold text-center mb-8">
-          My Watchlist
-        </h1>
+      <div className="flex justify-between mb-8">
+        <h1 className="text-3xl font-bold">Browse Movies</h1>
 
-        {/* ADD MOVIE FORM */}
-        <form
-          onSubmit={handleAddMovie}
-          className="bg-gray-800 p-6 rounded-xl shadow-lg mb-10 space-y-3"
+        <button
+          onClick={() => navigate('/wishlist')}
+          className="bg-pink-600 px-4 py-2 rounded"
         >
-          <h2 className="text-xl font-semibold mb-2">Add Movie</h2>
+          Go to Wishlist
+        </button>
+      </div>
 
-          <input
-            className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-            placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        {movies.map(movie => (
+          <div key={movie.id} className="bg-gray-800 rounded overflow-hidden">
 
-          <input
-            className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-            placeholder="Description / Review"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
+            <img src={movie.posterUrl} className="w-full h-72 object-cover"/>
 
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              className="p-2 rounded bg-gray-700 border border-gray-600"
-              placeholder="Year"
-              type="number"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-            />
+            <div className="p-3">
+              <h2 className="text-sm font-semibold">{movie.title}</h2>
 
-            <input
-              className="p-2 rounded bg-gray-700 border border-gray-600"
-              placeholder="Genre"
-              value={genre}
-              onChange={(e) => setGenre(e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <select
-              className="p-2 rounded bg-gray-700 border border-gray-600"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="plan_to_watch">Plan to Watch</option>
-              <option value="watching">Watching</option>
-              <option value="watched">Watched</option>
-            </select>
-
-            <input
-              className="p-2 rounded bg-gray-700 border border-gray-600"
-              placeholder="Rating (1-10)"
-              type="number"
-              min="1"
-              max="10"
-              value={rating}
-              onChange={(e) => setRating(e.target.value)}
-            />
-          </div>
-
-          <button
-            className="w-full bg-blue-600 hover:bg-blue-500 transition p-2 rounded font-semibold"
-            disabled={creating}
-          >
-            {creating ? 'Adding...' : 'Add Movie'}
-          </button>
-        </form>
-
-        {/* MOVIE LIST */}
-        {movies.length === 0 ? (
-          <p className="text-center text-gray-400">No movies added yet</p>
-        ) : (
-          <div className="space-y-6">
-            {movies.map((movie) => (
-              <div
-                key={movie.id}
-                className="bg-gray-800 p-5 rounded-xl shadow hover:scale-[1.02] transition"
+              <button
+                onClick={() => toggleWatchlist(movie.id)}
+                className={`mt-2 w-full py-2 rounded ${
+                  watchlistIds.has(movie.id)
+                    ? 'bg-red-600'
+                    : 'bg-green-600'
+                }`}
               >
-                <h3 className="text-2xl font-semibold">
-                  {movie.title} {movie.year ? `(${movie.year})` : ''}
-                </h3>
+                {watchlistIds.has(movie.id)
+                  ? 'Remove'
+                  : 'Add to Wishlist'}
+              </button>
 
-                <p className="text-gray-300 mt-2">{movie.description}</p>
-
-                <div className="mt-3 text-sm space-y-1 text-gray-400">
-                  <p>Status: {movie.status}</p>
-                  {movie.rating && <p>Rating: {movie.rating}/10</p>}
-                </div>
-
-                <button
-                  onClick={() => handleDelete(movie.id)}
-                  className="mt-4 text-red-400 hover:text-red-300"
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
+            </div>
           </div>
-        )}
+        ))}
       </div>
     </main>
- )  
+  )
 }
 
 export default DashboardPage

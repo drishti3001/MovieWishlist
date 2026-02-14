@@ -12,24 +12,34 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
 
-  items        Item[]
+  watchlist    Watchlist[]
 }
 
-model Item {
+model Movie {
   id          Int      @id @default(autoincrement())
   title       String
   description String
-
-  // movie fields
   year        Int?
   genre       String?
-  status      String   @default("plan_to_watch") // plan_to_watch | watching | watched
-  rating      Int?     // 1-10
   posterUrl   String?
 
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  watchlistedBy Watchlist[]
+}
+
+model Watchlist {
+  id      Int @id @default(autoincrement())
+
+  userId  Int
+  movieId Int
+
+  status  String  @default("plan_to_watch") // plan_to_watch | watching | watched
+  rating  Int?
+  review  String?   // ⭐ NEW FIELD (optional user review text)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId]) // prevents duplicates
 }

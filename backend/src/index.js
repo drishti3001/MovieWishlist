@@ -2,11 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
+
 dotenv.config();
 
 const authRoutes = require('./routes/authRoutes');
 const protectedRoutes = require('./routes/protectedRoutes');
-const itemRoutes = require('./routes/itemRoutes');
+const movieRoutes = require('./routes/movieRoutes');
+const watchlistRoutes = require('./routes/watchlistRoutes');
+
 
 const app = express();
 
@@ -22,7 +25,8 @@ app.get('/', (req, res) => {
 
 app.use(authRoutes);
 app.use(protectedRoutes);
-app.use(itemRoutes);
+app.use(movieRoutes);
+app.use(watchlistRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
