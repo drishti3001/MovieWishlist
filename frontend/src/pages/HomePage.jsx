@@ -1,29 +1,42 @@
-import { Link } from 'react-router-dom'
+import { useNavigate } from "react-router-dom"
+import "./HomePage.css"
 
 function HomePage() {
+  const navigate = useNavigate()
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-8 text-center">
+    <div className="home-container">
 
-      <h1 className="text-5xl font-bold">🎬 MovieVault</h1>
-      <p className="text-gray-400">Track movies. Rate them. Never forget what to watch next.</p>
+      {/* BACKGROUND VIDEO */}
+      <video autoPlay muted loop playsInline className="bg-video">
+        <source src="/bg.mp4" type="video/mp4" />
+      </video>
 
-      <div className="flex gap-4">
-        <Link
-          to="/login"
-          className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 transition"
-        >
-          Login
-        </Link>
+      {/* DARK OVERLAY */}
+      <div className="video-overlay" />
 
-        <Link
-          to="/signup"
-          className="px-6 py-3 rounded-xl bg-gray-700 hover:bg-gray-600 transition"
-        >
-          Create Account
-        </Link>
-      </div>
+      {/* NAVBAR */}
+      <header className="navbar">
+        <div className="logo">CineTrack</div>
 
-    </main>
+        <button className="login-btn" onClick={() => navigate("/login")}>
+          Sign In
+        </button>
+      </header>
+
+      {/* HERO CONTENT */}
+      <main className="hero">
+        <div className="glass-box">
+          <h1>Track. Rate. Remember.</h1>
+          <p>Your personal cinema diary.</p>
+
+          <button className="cta-btn" onClick={() => navigate("/signup")}>
+            Get Started
+          </button>
+        </div>
+      </main>
+
+    </div>
   )
 }
 

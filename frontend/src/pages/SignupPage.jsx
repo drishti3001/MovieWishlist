@@ -1,66 +1,82 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import "./auth.css"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 function SignupPage() {
   const navigate = useNavigate()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
+  const [error, setError] = useState("")
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-
-    setErrorMessage('')
+  const handleSignup = async () => {
+    setError("")
     setLoading(true)
 
     try {
-      const response = await fetch('http://localhost:4000/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const res = await fetch("http://localhost:4000/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
       })
 
-      const data = await response.json().catch(() => ({}))
+      const data = await res.json()
 
-      if (!response.ok) {
-        setErrorMessage(data?.message || 'Signup failed')
+      if (!res.ok) {
+        setError(data.message || "Signup failed")
         return
       }
 
-      // 🚀 go to login page after account creation
-      navigate('/login', { replace: true })
+      // After signup → go to login
+      navigate("/login")
 
     } catch {
-      setErrorMessage('Failed to reach backend')
+      setError("Server error")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main>
-      <h1>Signup Page</h1>
+    <div className="auth-page">
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </div>
+      <img src="/hawkins.jpg" alt="background" className="auth-bg" />
 
-        <div>
-          <label>Password:</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </div>
+      <div className="auth-card">
+        <h1>Create Account</h1>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Creating account...' : 'Sign up'}
+        <input
+          type="email"
+          placeholder="Enter email"
+          value={email}
+          onChange={(e)=>setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          placeholder="Enter password"
+          value={password}
+          onChange={(e)=>setPassword(e.target.value)}
+        />
+
+        <button
+          className="auth-btn"
+          onClick={handleSignup}
+          disabled={loading}
+        >
+          {loading ? "Creating..." : "Sign Up"}
         </button>
-      </form>
 
-      {errorMessage && <p>{errorMessage}</p>}
-    </main>
+        {error && <p style={{color:"salmon"}}>{error}</p>}
+
+        <p className="switch">
+          Already have an account? <span onClick={()=>navigate("/login")}>Log in</span>
+        </p>
+      </div>
+    </div>
   )
 }
 

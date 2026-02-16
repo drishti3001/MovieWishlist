@@ -1,0 +1,181 @@
+/* PAGE RESET */
+.home-container {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  color: white;
+  /* Ensure a stacking context if needed, but relative usually suffices */
+}
+
+/* RESET for Home Container */
+.home-container * {
+  box-sizing: border-box;
+}
+
+/* VIDEO LAYER (Layer 0) */
+.bg-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  /* Cinematic look: subtle blur + darkness + contrast */
+  filter: blur(0.3px) brightness(100%) contrast(1.7);
+  transform: scale(1.05);
+  /* slightly scale to hide blurred edges */
+
+  z-index: 0;
+  pointer-events: none;
+  /* ensure clicks pass through */
+}
+
+/* OVERLAY LAYER (Layer 1) */
+.video-overlay {
+  position: fixed;
+  inset: 0;
+
+  /* Gradient: Transparent top -> Readable center -> Dark edges */
+  background:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.8) 100%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0.8) 100%);
+
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* DECORATIVE / GLOW (Layer 2 - Optional, integrated into overlay or glass box shadow) */
+
+/* CONTENT CARD LAYER (Layer 3) */
+.hero {
+  position: relative;
+  /* ensure z-index applies */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+/* NAVBAR LAYER (Layer 4) */
+.navbar {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  padding: 28px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 4;
+  /* Topmost layer */
+}
+
+.logo {
+  font-size: 22px;        /* ← main size control */
+  font-weight: 800;       /* thicker = premium look */
+  letter-spacing: 1.5px;
+  opacity: 0.95;
+
+  transition: 0.2s ease;
+}
+
+/* optional subtle hover glow */
+.logo:hover {
+  color: #e50914;
+  text-shadow: 0 0 12px rgba(229, 9, 20, 0.5);
+}
+
+.login-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.35);
+
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+
+  padding: 10px 22px;
+  border-radius: 999px;
+
+  cursor: pointer;
+  margin-top: -50px;
+
+  backdrop-filter: blur(6px);
+  transition: all 0.25s ease;
+}
+
+/* hover → netflix red */
+.login-btn:hover {
+  background: #e50914;
+  border-color: #e50914;
+  color: white;
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
+  transform: translateY(-1px) scale(1.03);
+}
+
+
+
+
+/* GLASS GRID BOX */
+.glass-box {
+  padding: 60px 80px;
+  border-radius: 20px;
+
+  /* Glassmorphism */
+  backdrop-filter: blur(5px);
+  /* reduced blur on the card itself if needed, or keep high for glass effect */
+  background: rgba(255, 255, 255, 0.083);
+  /* More transparent */
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.5);
+  /* Soft glow behind card */
+
+  text-align: center;
+
+  /* subtle grid */
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* TITLE */
+.glass-box h1 {
+  font-size: 52px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  /* Improves readability */
+}
+
+/* SUBTITLE */
+.glass-box p {
+  opacity: 0.8;
+  font-size: 18px;
+  margin-bottom: 30px;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* CTA BUTTON */
+.cta-btn {
+  background: #e50914;
+  border: none;
+  color: white;
+  padding: 14px 34px;
+  font-size: 16px;
+  border-radius: 40px;
+  transition: 0.3s;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cta-btn:hover {
+  transform: scale(1.05);
+  background: #ff1f2d;
+  box-shadow: 0 0 25px rgba(229, 9, 20, 0.6);
+}

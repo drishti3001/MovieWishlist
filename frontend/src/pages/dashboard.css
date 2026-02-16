@@ -1,0 +1,670 @@
+/* DASHBOARD LAYOUT */
+.dashboard-container {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+    font-family: 'Inter', sans-serif;
+    color: white;
+}
+
+/* BACKGROUND IMAGE */
+.dashboard-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background-image: url('/dashboard-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    /* Blur and brightness adjustments */
+    filter: blur(8px) brightness(60%);
+    transform: scale(1.1);
+    /* prevent blurred edges */
+
+    z-index: -2;
+}
+
+/* DARK OVERLAY */
+.dashboard-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.8) 100%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* HEADER */
+.dashboard-header {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 50px;
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-header h1 {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    margin: 0;
+}
+
+/* MOVIE GRID */
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    /* Mobile: 1 col */
+    gap: 30px;
+    padding: 0 40px 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+@media (min-width: 768px) {
+    .movie-grid {
+        grid-template-columns: repeat(2, 1fr);
+        /* Tablet: 2 cols */
+    }
+}
+
+@media (min-width: 1024px) {
+    .movie-grid {
+        grid-template-columns: repeat(3, 1fr);
+        /* Desktop: 3 cols as requested */
+    }
+}
+
+/* MOVIE CARD */
+/* MOVIE CARD */
+.movie-card {
+    position: relative;
+    border-radius: 18px;
+    /* 1) MOVIE CARD CORNERS */
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    /* 2) Smooth animation (ease 0.35s) */
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 2 / 3;
+}
+
+.movie-card:hover {
+    transform: translateY(-8px);
+    /* 2) Lift only */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    /* 2) Soft shadow */
+    border-color: rgba(255, 255, 255, 0.3);
+    z-index: 10;
+    /* Ensure it overlaps neighbors nicely */
+}
+
+.movie-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+
+.movie-card:hover img {
+    transform: scale(1.08);
+}
+
+
+
+/* HEART BUTTON */
+.heart-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent dark for visibility against posters */
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s ease;
+    backdrop-filter: blur(4px);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.heart-btn:hover {
+    transform: scale(1.15);
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.heart-btn:active {
+    transform: scale(0.95);
+}
+
+/* HAMBURGER BUTTON */
+.hamburger-btn {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hamburger-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .hamburger-btn {
+        top: 20px;
+        left: 20px;
+    }
+}
+
+/* WISHLIST CONTENT OVERLAY */
+.wishlist-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 60%, transparent 100%);
+    color: white;
+    z-index: 20;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+}
+
+.text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* OVERLAY ICONS */
+.overlay-action-btn {
+    position: absolute;
+    top: 15px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.5);
+    /* Glass background */
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 15;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    color: white;
+    /* Default white */
+}
+
+.overlay-action-btn:hover {
+    background: rgba(229, 9, 20, 0.9);
+    /* Red hover */
+    transform: scale(1.1);
+    color: white;
+}
+
+.btn-top-right {
+    right: 15px;
+}
+
+.btn-top-left {
+    left: 15px;
+}
+
+/* EDIT OVERLAY & ANIMATIONS */
+@keyframes fadeInScale {
+    from {
+        transform: scale(0.98);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Global backdrop to close edit mode when clicking outside */
+.global-edit-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    cursor: default;
+}
+
+/* Ensure the editing card is above the global backdrop */
+.movie-card.editing-active {
+    z-index: 50 !important;
+    transform: none !important;
+    box-shadow: 0 0 0 4px rgba(229, 9, 20, 0.3);
+    /* Subtle highlight */
+}
+
+.movie-card.editing-active img {
+    filter: grayscale(40%) brightness(0.5);
+    /* Dim poster behind form */
+    transform: none !important;
+}
+
+/* The Full-Card Overlay Panel */
+.edit-overlay-panel {
+    position: absolute;
+    inset: 0;
+    /* Fill card completely */
+    background: linear-gradient(rgba(20, 20, 20, 0.85), rgba(20, 20, 20, 0.92));
+    backdrop-filter: blur(6px);
+    border-radius: inherit;
+    /* Matches card 18px */
+    padding: 24px;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    animation: fadeInScale 0.2s ease-out forwards;
+    color: white;
+    gap: 18px;
+}
+
+/* Form Styles */
+.edit-form-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 12px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+    opacity: 0.95;
+}
+
+.edit-select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    margin-top: 50px;
+}
+
+.edit-select:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #e50914;
+}
+
+.edit-select option {
+    background: #222;
+    color: white;
+}
+
+.edit-textarea {
+    width: 100%;
+    height: 110px;             
+    max-height: 70px;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #eee;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 0.9rem;
+    resize: none;
+    margin-top: 50px;
+    outline: none;
+    transition: all 0.25s ease;
+    line-height: 1.4;
+    margin-left:-10px;
+}
+
+.edit-textarea:focus {
+    border-color: rgba(229,9,20,0.7);
+    box-shadow: 0 0 12px rgba(229,9,20,0.35);
+}
+
+/* Star Rating */
+.star-rating-lg {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 14px 0 18px;
+}
+
+/* base star */
+.star-icon {
+    font-size: 34px;
+    cursor: pointer;
+    color: #2f2f2f;
+    transition: all 0.18s ease;
+    margin-top:40px;
+}
+
+/* hover preview */
+.star-icon.highlight {
+    color: #ff4d4d;
+    transform: scale(1.15);
+}
+
+/* selected */
+.star-icon.active {
+    color: #e50914;
+    filter: drop-shadow(0 0 6px rgba(229,9,20,0.6));
+}
+
+/* subtle hover lift */
+.star-icon:hover {
+    transform: scale(1.18);
+}
+
+
+
+/* Red save button */
+.save-btn {
+    background: #e50914;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 999px;
+    padding: 14px;
+    width: 100%;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+}
+
+.save-btn:hover {
+    background: linear-gradient(90deg, #e50914, #ff2a2a);
+    box-shadow: 0 8px 25px rgba(229,9,20,0.7);
+    transform: translateY(-2px) scale(1.02);
+}
+.back-btn {
+  background: #e50914;
+  color: white;
+  font-weight: 700;
+  padding: 12px 26px;
+  font-size: 18px;
+  border-radius: 999px;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+  margin-right: 20px;
+}
+
+/* shimmer */
+.back-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.7),
+    transparent
+  );
+  transition: all 0.6s ease;
+}
+
+.back-btn:hover::before {
+  left: 120%;
+}
+
+.back-btn:hover {
+  transform: scale(1.05);
+}
+.overlay-action-btn {
+  position: absolute;
+  top: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.25s ease;
+}
+
+.btn-top-left { left: 12px; }
+.btn-top-right { right: 12px; }
+
+/* hover effects */
+.overlay-action-btn:hover {
+  background: #e50914;
+  transform: scale(1.15);
+  box-shadow: 0 0 14px rgba(229,9,20,0.6);
+}
+
+/* MENU TRIGGER */
+.menu-trigger {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.menu-trigger:hover {
+  background: rgba(229,9,20,0.85);
+}
+
+/* FLOATING MENU */
+.movie-menu {
+  position: absolute;
+  top: 52px;
+  left: 12px;
+  width: 140px;
+  border-radius: 14px;
+  background: rgba(20,20,20,0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 20;
+  animation: fadeIn 0.15s ease;
+}
+
+.movie-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: white;
+  transition: 0.2s;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.movie-menu button:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(-6px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* FLIP CARD 3D */
+.card-3d {
+  position: relative;
+  perspective: 1200px;
+  width: 100%;
+  height: 100%;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.front, .back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden; /* Safari */
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.front {
+  z-index: 2;
+  transform: rotateY(0deg);
+}
+
+.back {
+  transform: rotateY(180deg);
+  background: linear-gradient(rgba(20,20,20,0.78), rgba(20,20,20,0.92));
+  backdrop-filter: blur(14px);
+  padding: 26px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 18px;
+
+  border-radius: inherit;
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+
+/* BACK SIDE REDESIGN */
+.back {
+  background: linear-gradient(rgba(20, 20, 20, 0.85), rgba(20, 20, 20, 0.92)) !important;
+  backdrop-filter: blur(12px);
+  padding: 24px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  gap: 16px;
+}
+
+.info-section{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-left:100px;
+  margin-top:40px;
+  padding-bottom:14px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+
+.info-section:last-child {
+  border-bottom: none;
+}
+
+.info-label{
+  font-size:28px;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+  color:#9ca3af;
+  font-weight:800;
+}
+
+
+.info-value{
+  font-size:20px;
+  font-weight:200;
+  color:white;
+}
+
+.info-rating{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.info-stars{
+  display:flex;
+  gap:4px;
+  font-size:20px;
+}
+
+.info-star-icon {
+  font-size: 28px;      
+  filter: drop-shadow(0 0 5px rgba(229, 9, 20, 0.4));
+}
+
+.review-text {
+  font-size: 1.1rem;
+  color: #ccc;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-style: normal;
+}
+
+.back > *:last-child{
+  margin-bottom:4px;
+}
+
+.back h3{
+  display:none;
+}

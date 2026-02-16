@@ -1,70 +1,85 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import "./auth.css"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 function LoginPage() {
   const navigate = useNavigate()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
+  const [error, setError] = useState("")
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-
-    setErrorMessage('')
+  const handleLogin = async () => {
+    setError("")
     setLoading(true)
 
     try {
-      const response = await fetch('http://localhost:4000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const res = await fetch("http://localhost:4000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
       })
 
-      const data = await response.json().catch(() => ({}))
+      const data = await res.json()
 
-      if (!response.ok) {
-        setErrorMessage(data?.message || 'Login failed')
+      if (!res.ok) {
+        setError(data.message || "Login failed")
         return
       }
 
-      if (data?.token) {
-        localStorage.setItem('token', data.token)
+      // SAVE TOKEN
+      localStorage.setItem("token", data.token)
 
-        // 🚀 redirect to dashboard
-        navigate('/dashboard', { replace: true })
-      }
+      // GO TO DASHBOARD
+      navigate("/dashboard")
 
     } catch {
-      setErrorMessage('Failed to reach backend')
+      setError("Server error")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main>
-      <h1>Login Page</h1>
+    <div className="auth-page">
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </div>
+      <img src="/hawkins.jpg" alt="background" className="auth-bg" />
 
-        <div>
-          <label>Password:</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </div>
+      <div className="auth-card">
+        <h1>Welcome Back :)</h1>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Log in'}
+        <input
+          type="email"
+          placeholder="Enter email"
+          value={email}
+          onChange={(e)=>setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          placeholder="Enter password"
+          value={password}
+          onChange={(e)=>setPassword(e.target.value)}
+        />
+
+        <button
+          className="auth-btn"
+          onClick={handleLogin}
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Log In"}
         </button>
-      </form>
 
-      {errorMessage && <p>{errorMessage}</p>}
-    </main>
+        {error && <p style={{color:"salmon"}}>{error}</p>}
+
+        <p className="switch">
+          Don’t have an account? <span onClick={()=>navigate("/signup")}>Sign up</span>
+        </p>
+      </div>
+    </div>
   )
 }
 

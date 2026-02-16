@@ -1,11 +1,20 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
+import './dashboard.css'
+import { FiEdit2, FiMoreVertical, FiInfo } from "react-icons/fi"
+import { HiOutlineTrash } from "react-icons/hi"
+import { FaStar } from "react-icons/fa"
+
 
 function WishlistPage() {
   const navigate = useNavigate()
   const [watchlist, setWatchlist] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [hoverRating, setHoverRating] = useState(null)
+  const [openMenuId, setOpenMenuId] = useState(null)
+  const [infoOpenId, setInfoOpenId] = useState(null)
+
+  const editPanelRef = useRef(null)
 
   // LOAD
   const load = async () => {
@@ -22,8 +31,26 @@ function WishlistPage() {
 
   useEffect(() => { load() }, [])
 
+  // TRUE OUTSIDE CLICK DETECTION
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      // Close Menu if clicking outside
+      setOpenMenuId(null)
+
+      if (!editingId) return
+
+      if (editPanelRef.current && !editPanelRef.current.contains(e.target)) {
+        setEditingId(null)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [editingId])
+
   // DELETE
   const remove = async (movieId) => {
+    setInfoOpenId(null)
     const token = localStorage.getItem("token")
 
     await fetch(`http://localhost:4000/watchlist/${movieId}`, {
@@ -64,51 +91,21 @@ function WishlistPage() {
     })
   }
 
-  // ⭐ STAR COMPONENT
+  // STAR COMPONENT
   const StarRating = ({ item, index }) => {
-    const displayRating = hoverRating ?? item.rating ?? 0
-
     return (
-      <div className="flex gap-1 mt-3">
-        {[1,2,3,4,5].map(star => {
-          const full = displayRating >= star
-          const half = displayRating >= star - 0.5 && displayRating < star
+      <div className="star-rating-lg" onMouseLeave={() => setHoverRating(null)}>
+        {[1, 2, 3, 4, 5].map(star => {
+          const isHighlight = hoverRating && star <= hoverRating;
+          const isActive = !hoverRating && item.rating && star <= item.rating;
 
           return (
-            <div
+            <FaStar
               key={star}
-              className="relative text-3xl cursor-pointer select-none"
-              onMouseLeave={() => setHoverRating(null)}
-            >
-              {/* LEFT HALF */}
-              <span
-                className="absolute left-0 top-0 w-1/2 h-full z-10"
-                onMouseEnter={() => setHoverRating(star - 0.5)}
-                onClick={() => change(index,'rating',star)}
-              />
-
-              {/* RIGHT HALF */}
-              <span
-                className="absolute right-0 top-0 w-1/2 h-full z-10"
-                onMouseEnter={() => setHoverRating(star)}
-                onClick={() => change(index,'rating',star)}
-              />
-
-              {/* STAR VISUAL */}
-              <span className="text-gray-600">★</span>
-
-              {half && (
-                <span className="absolute left-0 top-0 text-yellow-400 overflow-hidden w-1/2">
-                  ★
-                </span>
-              )}
-
-              {full && (
-                <span className="absolute left-0 top-0 text-yellow-400">
-                  ★
-                </span>
-              )}
-            </div>
+              className={`star-icon ${isActive ? 'active' : ''} ${isHighlight ? 'highlight' : ''}`}
+              onMouseEnter={() => setHoverRating(star)}
+              onClick={() => change(index, 'rating', star)}
+            />
           )
         })}
       </div>
@@ -116,97 +113,187 @@ function WishlistPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white p-8">
+    <div className="dashboard-container relative min-h-screen text-white">
 
-      <div className="flex justify-between mb-8">
-        <h1 className="text-3xl font-bold">My Wishlist</h1>
-        <button onClick={() => navigate('/dashboard')} className="bg-blue-600 px-4 py-2 rounded">
+      {/* Background & Overlay */}
+      <div className="dashboard-bg"></div>
+      <div className="dashboard-overlay"></div>
+
+      {/* Header */}
+      <div className="dashboard-header flex justify-between items-center p-8 relative z-10">
+        <h1 className="text-4xl font-extrabold tracking-tight">My Wishlist</h1>
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="back-btn"
+        >
           Back
         </button>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      {/* Movie Grid */}
+      <div className="movie-grid">
 
         {watchlist.map((item, i) => (
-          <div key={item.id} className="bg-gray-800 p-4 rounded">
+          <div key={item.id} className={`movie-card group ${editingId === item.movieId ? 'editing-active' : ''}`}>
 
-            <img src={item.movie.posterUrl} className="w-full h-64 object-cover rounded"/>
+            <div className="card-3d">
+              <div className={`card-inner ${infoOpenId === item.movieId ? 'flipped' : ''}`}>
 
-            <h2 className="mt-3 font-semibold">{item.movie.title}</h2>
+                {/* FRONT SIDE */}
+                <div className="front">
+                  <img src={item.movie.posterUrl} alt={item.movie.title} />
 
-            {/* ---------- NORMAL VIEW ---------- */}
-            {editingId !== item.movieId && (
-              <>
-                <div className="mt-3 space-y-2 text-sm">
-                  <p>Status: {item.status}</p>
+                  {/* ACTION ICONS */}
+                  {editingId !== item.movieId && (
+                    <>
+                      <button
+                        className="menu-trigger"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setOpenMenuId(openMenuId === item.movieId ? null : item.movieId)
+                        }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                      >
+                        <FiMoreVertical size={20} color="white" />
+                      </button>
 
-                  {item.rating && (
-                    <div className="flex gap-1 text-yellow-400 text-xl">
-                      {[1,2,3,4,5].map(star => (
-                        <span key={star}>
-                          {star <= item.rating ? "★" : "☆"}
-                        </span>
-                      ))}
-                    </div>
+                      {openMenuId === item.movieId && (
+                        <div
+                          className="movie-menu"
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setEditingId(item.movieId)
+                              setOpenMenuId(null)
+                              setInfoOpenId(null)
+                            }}
+                          >
+                            <FiEdit2 size={16} /> Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              remove(item.movieId)
+                              setOpenMenuId(null)
+                            }}
+                          >
+                            <HiOutlineTrash size={16} /> Delete
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setInfoOpenId(infoOpenId === item.movieId ? null : item.movieId)
+                              setOpenMenuId(null)
+                            }}
+                          >
+                            <FiInfo size={16} /> Info
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
 
-                  {item.review && <p>Review: {item.review}</p>}
+                  {/* CONTENT OVERLAY */}
+                  <div
+                    className="wishlist-content"
+                    style={{ opacity: editingId === item.movieId ? 0 : 1 }}
+                  >
+                  </div>
+
+                  {/* EDIT PANEL */}
+                  {editingId === item.movieId && (
+                    <div
+                      ref={editPanelRef}
+                      className="edit-overlay-panel"
+                    >
+                      <h3 className="edit-form-title">{item.movie.title}</h3>
+
+                      <div className="space-y-4 flex-grow flex flex-col">
+                        <select
+                          value={item.status}
+                          onChange={(e) => change(i, 'status', e.target.value)}
+                          className="edit-select"
+                        >
+                          <option value="plan_to_watch">Plan to watch</option>
+                          <option value="watching">Watching</option>
+                          <option value="watched">Watched</option>
+                        </select>
+
+                        <div className="text-center">
+                          <StarRating item={item} index={i} />
+                        </div>
+
+                        <textarea
+                          value={item.review || ''}
+                          onChange={(e) => change(i, 'review', e.target.value)}
+                          placeholder="Write your thoughts..."
+                          className="edit-textarea"
+                        />
+                      </div>
+
+                      <button
+                        onClick={() => saveUpdate(item)}
+                        className="save-btn"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex gap-2 mt-4">
-                  <button
-                    onClick={() => setEditingId(item.movieId)}
-                    className="flex-1 bg-green-600 p-2 rounded"
-                  >
-                    Update
-                  </button>
+                {/* BACK SIDE */}
+                <div
+                  className="back"
+                  onClick={(e) => {
+                  e.stopPropagation()
+                  setInfoOpenId(null)
+                }} 
+                >
 
-                  <button
-                    onClick={() => remove(item.movieId)}
-                    className="flex-1 bg-red-600 p-2 rounded"
-                  >
-                    Delete
-                  </button>
+                  {/* STATUS */}
+                  <div className="info-section">
+                      <span className="info-label">Status</span>
+                      <span className="info-value">
+                        {item.status ? item.status.replace(/_/g, ' ') : 'Not set'}
+                      </span>
+                  </div>
+
+                  {/* RATING */}
+                  <div className="info-section">
+                    <span className="info-label">Rating</span>
+                    <div className="info-stars">
+                      {[1,2,3,4,5].map(star => (
+                        <FaStar
+                          key={star}
+                          className="info-star-icon"
+                          style={{
+                               color: star <= (item.rating || 0) ? "#e50914" : "#3a3a3a",
+                              }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* REVIEW */}
+                  <div className="info-section">
+                    <span className="info-label">Review</span>
+                    <p className="review-text">
+                      {item.review || "No review written yet."}
+                    </p>
+                  </div>
                 </div>
-              </>
-            )}
 
-            {/* ---------- EDIT MODE ---------- */}
-            {editingId === item.movieId && (
-              <>
-                <select
-                  value={item.status}
-                  onChange={(e)=>change(i,'status',e.target.value)}
-                  className="w-full mt-3 bg-gray-700 p-2 rounded"
-                >
-                  <option value="plan_to_watch">Plan to watch</option>
-                  <option value="watching">Watching</option>
-                  <option value="watched">Watched</option>
-                </select>
-
-                <StarRating item={item} index={i} />
-
-                <textarea
-                  value={item.review || ''}
-                  onChange={(e)=>change(i,'review',e.target.value)}
-                  placeholder="Review"
-                  className="w-full mt-3 bg-gray-700 p-2 rounded"
-                />
-
-                <button
-                  onClick={()=>saveUpdate(item)}
-                  className="w-full bg-blue-600 p-2 rounded mt-4"
-                >
-                  Save
-                </button>
-              </>
-            )}
+              </div>
+            </div>
 
           </div>
         ))}
 
       </div>
-    </main>
+    </div>
   )
 }
 

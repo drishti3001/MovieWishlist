@@ -1,0 +1,134 @@
+/* FULL PAGE */
+.auth-page {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+}
+
+/* BACKGROUND IMAGE */
+/* BACKGROUND IMAGE */
+.auth-bg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  min-width: 120%;
+  min-height: 120%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%) scale(1.25);
+
+  object-fit: cover;
+  /* Reduced blur, higher brightness, less artificial contrast */
+  filter: blur(4px) brightness(70%);
+
+  z-index: 0;
+}
+
+
+/* DARK OVERLAY - REMOVED */
+.auth-overlay {
+  display: none;
+  /* Removed as requested to remove fog/grid layers */
+}
+
+/* CARD */
+.auth-card {
+  position: relative;
+  z-index: 2;
+
+  width: 460px;
+  /* bigger */
+  padding: 60px 50px;
+  /* more breathing room */
+  border-radius: 22px;
+
+  /* Frosted glass effect only - no grid */
+  backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 120px rgba(0, 0, 0, 0.5);
+  /* slightly reduced shadow opacity */
+
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  text-align: center;
+}
+
+
+/* TITLE */
+.auth-card h1 {
+  font-size: 40px;
+  /* was 32 */
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+
+/* INPUTS */
+.auth-card input {
+  padding: 18px 18px;
+  font-size: 16px;
+  border-radius: 14px;
+}
+
+
+.auth-card input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.auth-card input:focus {
+  border-color: #e50914;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.4);
+}
+
+/* BUTTON */
+.auth-btn {
+  padding: 14px 24px;
+  /* Slightly larger height/width feel */
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+
+  /* Pill shape */
+  border-radius: 999px;
+
+  /* Netflix Red Background */
+  background: #e50914;
+  color: white;
+  border: none;
+  cursor: pointer;
+
+  /* Animation setup */
+  transition: all 0.3s ease;
+  transform: scale(1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+
+/* HOVER EFFECT */
+.auth-btn:hover {
+  background: #ff1f2d;
+  /* Brighter red */
+  box-shadow: 0 0 25px rgba(229, 9, 20, 0.6);
+  /* Soft glow */
+  transform: scale(1.05);
+  /* Subtle scale animation */
+}
+
+/* SWITCH TEXT */
+.switch {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.switch span {
+  color: white;
+  cursor: pointer;
+  text-decoration: underline;
+}
