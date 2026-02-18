@@ -7,10 +7,28 @@
   color-scheme: dark;
 }
 
+html {
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: clamp(15px, 0.35vw + 14px, 16px);
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
 html, body, #root {
   height: 100%;
 }
 
 body {
   margin: 0;
+  overflow-x: hidden;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
 }

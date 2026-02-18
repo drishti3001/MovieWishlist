@@ -132,3 +132,38 @@
   cursor: pointer;
   text-decoration: underline;
 }
+
+/* Mobile-only compact auth card (<= 480px) */
+@media (max-width: 480px) {
+  .auth-page {
+    height: auto;
+    min-height: 100svh;
+    min-height: 100dvh;
+    align-items: center;
+    padding-top: 0;
+    padding-inline: 16px;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 28px 20px;
+    gap: 14px;
+  }
+
+  .auth-card h1 {
+    font-size: 28px;
+  }
+
+  .auth-card input {
+    padding: 12px 14px;
+    font-size: 15px;
+    border-radius: 12px;
+  }
+
+  .auth-btn {
+    padding: 12px 18px;
+    font-size: 16px;
+    min-height: 44px;
+  }
+}
