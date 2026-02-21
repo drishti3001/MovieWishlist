@@ -1,11 +1,7 @@
 const axios = require('axios');
 const https = require('https');
 const { PrismaClient } = require('@prisma/client');
-const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
-
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL,
-});
+const prisma = new PrismaClient()
 
 // The httpsAgent helps prevent ECONNRESET by reusing connections
 const httpsAgent = new https.Agent({ 
@@ -13,7 +9,6 @@ const httpsAgent = new https.Agent({
   timeout: 60000 
 });
 
-const prisma = new PrismaClient({ adapter });
 
 // GET /movies → local catalog
 async function getAllMovies(req, res) {
