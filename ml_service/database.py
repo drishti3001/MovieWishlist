@@ -1,0 +1,32 @@
+from pathlib import Path
+
+import pandas as pd
+import sqlite3
+
+# Existing backend SQLite database. Do not create a new database.
+DB_PATH = (Path(__file__).resolve().parent / "../backend/dev.db").resolve()
+
+
+def get_database_path() -> Path:
+    return DB_PATH
+
+
+def get_interactions() -> pd.DataFrame:
+    query = """
+    SELECT userId, movieId, status, rating
+    FROM Watchlist
+    """
+    status_map = {
+        "plan_to_watch": 1,
+        "watching": 2,
+        "watched": 3,
+    }
+
+    with sqlite3.connect(DB_PATH) as connection:
+        interactions = pd.read_sql_query(query, connection)
+
+    interactions["status_score"] = interactions["status"].map(status_map).fillna(0)
+    interactions["rating"] = interactions["rating"].fillna(0)
+    interactions["score"] = interactions["status_score"] + interactions["rating"]
+
+    return interactions

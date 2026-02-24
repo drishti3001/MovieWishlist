@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const protectedRoutes = require('./routes/protectedRoutes');
 const movieRoutes = require('./routes/movieRoutes');
 const watchlistRoutes = require('./routes/watchlistRoutes');
+const recommendationRoutes = require('./routes/recommendationRoutes');
 
 
 const app = express();
@@ -27,8 +28,8 @@ app.use(authRoutes);
 app.use(protectedRoutes);
 app.use(movieRoutes);
 app.use(watchlistRoutes);
+app.use(recommendationRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
-

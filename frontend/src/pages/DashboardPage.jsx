@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar' 
 import SearchResultsPage from '../components/SearchResultsPage' // Renamed for clarity
+import MovieRow from '../components/MovieRow'
 import './dashboard.css'
 
 function DashboardPage() {
   const navigate = useNavigate()
   const [movies, setMovies] = useState([])
+  const [recommended, setRecommended] = useState([])
   const [watchlistIds, setWatchlistIds] = useState(new Set())
   const [loading, setLoading] = useState(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false) 
@@ -34,6 +36,16 @@ function DashboardPage() {
           if (item.movie?.tmdbId) ids.add(item.movie.tmdbId)
         })
         setWatchlistIds(ids)
+
+        const r = await fetch('http://localhost:4000/recommendations', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+
+        if (r.ok) {
+          const recData = await r.json()
+          setRecommended(recData)
+          console.log("Recommended movies:", recData)
+        }
       } catch {
         localStorage.removeItem('token')
         navigate('/login')
@@ -71,6 +83,17 @@ function DashboardPage() {
     setIsSearchExpanded(false)
     setSearchQuery("")
   }
+
+  // Genre groupings
+  const actionMovies = movies.filter(m => m.genre?.includes("Action"))
+  const dramaMovies = movies.filter(m => m.genre?.includes("Drama"))
+  const thrillerMovies = movies.filter(m => m.genre?.includes("Thriller"))
+  const comedyMovies = movies.filter(m => m.genre?.includes("Comedy"))
+
+  console.log("Action:", actionMovies.length)
+  console.log("Drama:", dramaMovies.length)
+  console.log("Thriller:", thrillerMovies.length)
+  console.log("Comedy:", comedyMovies.length)
 
   if (loading) return <p className="text-white p-10">Loading...</p>
 
@@ -110,16 +133,43 @@ function DashboardPage() {
           <header className="dashboard-header">
             <h1>Movie Catalogue</h1>
           </header>
-          <main className="movie-grid">
-            {movies
-            .map(movie => (
-              <div key={movie.id} className="movie-card">
-                <button className="heart-btn" onClick={() => toggleWatchlist(movie.id)}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={watchlistIds.has(movie.id) ? "#e50914" : "none"} stroke={watchlistIds.has(movie.id) ? "#e50914" : "white"} strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                </button>
-                <img src={movie.posterUrl} alt={movie.title} />
-              </div>
-            ))}
+          <main className="dashboard-content">
+            {recommended.length > 0 && (
+              <MovieRow
+                title="Recommended For You"
+                movies={recommended}
+                watchlistIds={watchlistIds}
+                toggleWatchlist={toggleWatchlist}
+              />
+            )}
+
+            <MovieRow
+              title="Action"
+              movies={actionMovies}
+              watchlistIds={watchlistIds}
+              toggleWatchlist={toggleWatchlist}
+            />
+
+            <MovieRow
+              title="Drama"
+              movies={dramaMovies}
+              watchlistIds={watchlistIds}
+              toggleWatchlist={toggleWatchlist}
+            />
+
+            <MovieRow
+              title="Thriller"
+              movies={thrillerMovies}
+              watchlistIds={watchlistIds}
+              toggleWatchlist={toggleWatchlist}
+            />
+
+            <MovieRow
+              title="Comedy"
+              movies={comedyMovies}
+              watchlistIds={watchlistIds}
+              toggleWatchlist={toggleWatchlist}
+            />
           </main>
         </>
       )}
