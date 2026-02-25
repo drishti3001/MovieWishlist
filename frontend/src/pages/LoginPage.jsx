@@ -1,6 +1,7 @@
 import "./auth.css"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { GoogleLogin } from "@react-oauth/google"
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -43,6 +44,41 @@ function LoginPage() {
     }
   }
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError("")
+    try {
+      const res = await fetch("http://localhost:4000/google", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ credential: credentialResponse.credential })
+      })
+
+      let data = {}
+      try {
+        data = await res.json()
+      } catch {
+        data = {}
+      }
+
+      if (!res.ok) {
+        setError(data.message || "Google authentication failed")
+        return
+      }
+
+      if (!data.token) {
+        setError("Google authentication failed")
+        return
+      }
+
+      localStorage.setItem("token", data.token)
+      navigate("/dashboard")
+    } catch {
+      setError("Google authentication failed")
+    }
+  }
+
   return (
     <div className="auth-page">
 
@@ -50,6 +86,18 @@ function LoginPage() {
 
       <div className="auth-card">
         <h1>Welcome Back :)</h1>
+
+        <div className="social-login-container">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google authentication failed")}
+            theme="outline"
+            shape="pill"
+            width="100%"
+          />
+        </div>
+        <div className="auth-separator">
+        </div>
 
         <input
           type="email"
