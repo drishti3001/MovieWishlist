@@ -1,26 +1,21 @@
-const { PrismaClient } = require('@prisma/client')
-const prisma = new PrismaClient()
-// ADD/UPDATE TO WATCHLIST
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+// ADD/UPDATE TO WATCHLIST (Syncs TMDB movies and links to User)
 async function addToWatchlist(req, res) {
   const userId = req.userId;
   const { movieId, tmdbMovie } = req.body;
-
-  console.log("--- Watchlist Add Attempt ---");
-  console.log("User ID:", userId);
-  console.log("TMDB Movie Object Received:", tmdbMovie ? "YES" : "NO");
 
   try {
     let finalMovieId;
 
     if (tmdbMovie) {
-      console.log("Searching for movie in local DB by TMDB ID:", tmdbMovie.id);
-      
+      // Sync TMDB movie to local database
       let movie = await prisma.movie.findUnique({
         where: { tmdbId: tmdbMovie.id }
       });
 
       if (!movie) {
-        console.log("Movie not found locally. Creating entry for:", tmdbMovie.title);
         movie = await prisma.movie.create({
           data: {
             tmdbId: tmdbMovie.id,
@@ -36,8 +31,7 @@ async function addToWatchlist(req, res) {
       finalMovieId = Number(movieId || req.params.movieId);
     }
 
-    console.log("Linking Movie ID:", finalMovieId, "to User ID:", userId);
-
+    // Use upsert to prevent duplicate entry errors
     const entry = await prisma.watchlist.upsert({
       where: { userId_movieId: { userId, movieId: finalMovieId } },
       update: { status: 'plan_to_watch' },
@@ -48,61 +42,73 @@ async function addToWatchlist(req, res) {
       },
     });
 
-    console.log("Successfully added to watchlist!");
     res.json(entry);
   } catch (err) {
-    console.error("WATCHLIST CRITICAL ERROR:", err);
+    console.error("WATCHLIST ERROR:", err);
     res.status(500).json({ message: 'Failed to add to wishlist' });
   }
 }
 
-// GET USER WATCHLIST
+// GET USER WATCHLIST (The "Diary" list)
 async function getWatchlist(req, res) {
-  const userId = req.userId
+  const userId = req.userId;
 
   try {
     const list = await prisma.watchlist.findMany({
       where: { userId },
       include: { movie: true },
       orderBy: { id: 'desc' }
-    })
+    });
 
-    res.json(list)
+    res.json(list);
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ message: 'Failed to load watchlist' })
+    console.error(err);
+    res.status(500).json({ message: 'Failed to load watchlist' });
   }
 }
 
-// UPDATE STATUS / RATING
+/**
+ * UPDATE STATUS / RATING / REVIEW
+ * 🟢 FIXED: Changed from .update() to .upsert()
+ * This fixes the P2025 "Record not found" error when editing movies in a playlist.
+ */
 async function updateWatchlist(req, res) {
-  const userId = req.userId
-  const movieId = Number(req.params.movieId)
-  const { status, rating, review } = req.body
+  const userId = req.userId;
+  const movieId = Number(req.params.movieId);
+  const { status, rating, review } = req.body;
 
   try {
-    const updated = await prisma.watchlist.update({
-      where: { userId_movieId: { userId, movieId } },
-      data: {
+    const updated = await prisma.watchlist.upsert({
+      where: {
+        userId_movieId: { userId, movieId }
+      },
+      // If diary entry exists, update these fields
+      update: {
         ...(status !== undefined && { status }),
-        ...(rating !== undefined && { rating }),
+        ...(rating !== undefined && { rating: Math.round(rating) }),
         ...(review !== undefined && { review }),
+      },
+      // If diary entry doesn't exist, create it with these values
+      create: {
+        userId,
+        movieId,
+        status: status || 'plan_to_watch',
+        rating: rating !== undefined ? Math.round(rating) : null,
+        review: review || "",
       }
-    })
+    });
 
-    res.json(updated)
+    res.json(updated);
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ message: 'Update failed' })
+    console.error("UPSERT ERROR:", err);
+    res.status(500).json({ message: 'Failed to save diary entry' });
   }
 }
 
-// REMOVE
+// REMOVE FROM DIARY
 async function removeFromWatchlist(req, res) {
   const userId = req.userId;
   const idToMatch = Number(req.params.movieId);
-
-  console.log(`Attempting delete for User: ${userId}, ID: ${idToMatch}`);
 
   try {
     await prisma.watchlist.deleteMany({
@@ -123,9 +129,10 @@ async function removeFromWatchlist(req, res) {
     res.status(500).json({ message: 'Delete failed' });
   }
 }
+
 module.exports = {
   addToWatchlist,
   getWatchlist,
   updateWatchlist,
   removeFromWatchlist
-}
+};

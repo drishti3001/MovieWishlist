@@ -1,13 +1,12 @@
-const express = require('express')
-const authMiddleware = require('../middleware/authMiddleware')
-const { getAllMovies, searchTMDB } = require('../controllers/movieController')
+const express = require('express');
+const router = express.Router();
+const movieController = require('../controllers/movieController');
 
-const router = express.Router()
+// 🟢 MATCH THE NAME: Destructure 'authMiddleware' specifically
+const { authMiddleware } = require('../middleware/authMiddleware');
 
-// catalog movies
-router.get('/movies', authMiddleware, getAllMovies)
+router.get('/movies', authMiddleware, movieController.getAllMovies);
+router.get('/search', authMiddleware, movieController.searchTMDB);
+router.post('/movies', authMiddleware, movieController.syncMovie);
 
-// NEW: Search TMDB Proxy route
-router.get('/search', authMiddleware, searchTMDB)
-
-module.exports = router
+module.exports = router;

@@ -18,7 +18,7 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/playlist/:playlistId" element={<WishlistPage />} />
         </Routes>
       </BrowserRouter>
     </GoogleOAuthProvider>

@@ -1,10 +1,10 @@
 const express = require('express');
-
-const authMiddleware = require('../middleware/authMiddleware');
-const { getRecommendations } = require('../controllers/recommendationController');
-
 const router = express.Router();
+const recommendationController = require('../controllers/recommendationController');
+// 🟢 FIX: Add curly braces to destructure the function
+const { authMiddleware } = require('../middleware/authMiddleware');
 
-router.get('/recommendations', authMiddleware, getRecommendations);
+// Recommendations require the user to be logged in to pull their taste profile
+router.get('/recommendations', authMiddleware, recommendationController.getRecommendations);
 
 module.exports = router;

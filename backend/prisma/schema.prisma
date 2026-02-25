@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
+  id           Int         @id @default(autoincrement())
+  email        String      @unique
   passwordHash String?
-  googleId     String?  @unique   
-  createdAt    DateTime @default(now())
+  googleId     String?     @unique
+  createdAt    DateTime    @default(now())
   watchlist    Watchlist[]
+  playlists    Playlist[]
 }
 
 model Movie {
@@ -24,24 +25,43 @@ model Movie {
   year        Int?
   genre       String?
   posterUrl   String?
-
   createdAt   DateTime @default(now())
 
-  watchlistedBy Watchlist[]
+  watchlistedBy  Watchlist[]
+  playlistMovies PlaylistMovie[]
 }
 
 model Watchlist {
   id      Int @id @default(autoincrement())
-
   userId  Int
   movieId Int
 
-  status  String  @default("plan_to_watch") // plan_to_watch | watching | watched
-  rating  Int?
-  review  String?   // ⭐ NEW FIELD (optional user review text)
+  status String  @default("plan_to_watch") // plan_to_watch | watching | watched
+  rating Int?
+  review String?
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, movieId]) // prevents duplicates
+  @@unique([userId, movieId])
+}
+
+model Playlist {
+  id        Int             @id @default(autoincrement())
+  name      String
+  userId    Int
+  user      User            @relation(fields: [userId], references: [id])
+  movies    PlaylistMovie[]
+  createdAt DateTime        @default(now())
+}
+
+model PlaylistMovie {
+  id         Int      @id @default(autoincrement())
+  playlistId Int
+  movieId    Int
+
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  movie      Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, movieId])
 }

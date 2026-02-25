@@ -9,7 +9,7 @@ function DashboardPage() {
   const navigate = useNavigate()
   const [movies, setMovies] = useState([])
   const [recommended, setRecommended] = useState([])
-  const [watchlistIds, setWatchlistIds] = useState(new Set())
+  const [playlists, setPlaylists] = useState([])
   const [loading, setLoading] = useState(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false) 
   
@@ -28,15 +28,6 @@ function DashboardPage() {
         const m = await fetch('http://localhost:4000/movies', { headers: { Authorization: `Bearer ${token}` } })
         setMovies(await m.json())
 
-        const w = await fetch('http://localhost:4000/watchlist', { headers: { Authorization: `Bearer ${token}` } })
-        const watchData = await w.json()
-        const ids = new Set()
-        watchData.forEach(item => {
-          ids.add(item.movieId)
-          if (item.movie?.tmdbId) ids.add(item.movie.tmdbId)
-        })
-        setWatchlistIds(ids)
-
         const r = await fetch('http://localhost:4000/recommendations', {
           headers: { Authorization: `Bearer ${token}` }
         })
@@ -46,6 +37,15 @@ function DashboardPage() {
           setRecommended(recData)
           console.log("Recommended movies:", recData)
         }
+
+        const p = await fetch('http://localhost:4000/playlists', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+
+        if (p.ok) {
+          const playlistsData = await p.json()
+          setPlaylists(Array.isArray(playlistsData) ? playlistsData : [])
+        }
       } catch {
         localStorage.removeItem('token')
         navigate('/login')
@@ -53,25 +53,6 @@ function DashboardPage() {
     }
     load()
   }, [navigate])
-
-  const toggleWatchlist = async (movieId, tmdbMovie = null) => {
-    const token = localStorage.getItem('token')
-    const identifier = tmdbMovie ? tmdbMovie.id : movieId
-    const exists = watchlistIds.has(identifier)
-    try {
-      if (exists) {
-        await fetch(`http://localhost:4000/watchlist/${identifier}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
-        setWatchlistIds(prev => { const s = new Set(prev); s.delete(identifier); return s; })
-      } else {
-        const res = await fetch(`http://localhost:4000/watchlist`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ tmdbMovie, movieId: !tmdbMovie ? movieId : null })
-        })
-        if (res.ok) setWatchlistIds(prev => new Set([...prev, identifier]))
-      }
-    } catch { alert('Failed to update wishlist') }
-  }
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
@@ -125,8 +106,7 @@ function DashboardPage() {
         <SearchResultsPage 
           query={searchQuery} 
           onClose={handleCloseSearch} 
-          watchlistIds={watchlistIds} 
-          toggleWatchlist={toggleWatchlist} 
+          playlists={playlists} 
         />
       ) : (
         <>
@@ -138,37 +118,32 @@ function DashboardPage() {
               <MovieRow
                 title="Recommended For You"
                 movies={recommended}
-                watchlistIds={watchlistIds}
-                toggleWatchlist={toggleWatchlist}
+                playlists={playlists}
               />
             )}
 
             <MovieRow
               title="Action"
               movies={actionMovies}
-              watchlistIds={watchlistIds}
-              toggleWatchlist={toggleWatchlist}
+              playlists={playlists}
             />
 
             <MovieRow
               title="Drama"
               movies={dramaMovies}
-              watchlistIds={watchlistIds}
-              toggleWatchlist={toggleWatchlist}
+              playlists={playlists}
             />
 
             <MovieRow
               title="Thriller"
               movies={thrillerMovies}
-              watchlistIds={watchlistIds}
-              toggleWatchlist={toggleWatchlist}
+              playlists={playlists}
             />
 
             <MovieRow
               title="Comedy"
               movies={comedyMovies}
-              watchlistIds={watchlistIds}
-              toggleWatchlist={toggleWatchlist}
+              playlists={playlists}
             />
           </main>
         </>

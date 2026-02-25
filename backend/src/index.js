@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
-
 dotenv.config();
 
 const authRoutes = require('./routes/authRoutes');
@@ -10,7 +9,7 @@ const protectedRoutes = require('./routes/protectedRoutes');
 const movieRoutes = require('./routes/movieRoutes');
 const watchlistRoutes = require('./routes/watchlistRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
-
+const playlistRoutes = require('./routes/playlistRoutes'); // 1. Import new routes
 
 const app = express();
 
@@ -29,6 +28,7 @@ app.use(protectedRoutes);
 app.use(movieRoutes);
 app.use(watchlistRoutes);
 app.use(recommendationRoutes);
+app.use(playlistRoutes); // 2. Use new routes
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);

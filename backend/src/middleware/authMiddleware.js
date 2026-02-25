@@ -33,5 +33,5 @@ function authMiddleware(req, res, next) {
   }
 }
 
-module.exports = authMiddleware;
-
+// 🟢 CHANGE THIS LINE: Export as an object
+module.exports = { authMiddleware };

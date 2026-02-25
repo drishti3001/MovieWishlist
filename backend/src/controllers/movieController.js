@@ -1,21 +1,23 @@
 const axios = require('axios');
 const https = require('https');
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-// The httpsAgent helps prevent ECONNRESET by reusing connections
+// helps prevent ECONNRESET by reusing connections
 const httpsAgent = new https.Agent({ 
   keepAlive: true, 
   timeout: 60000 
 });
 
-
-// GET /movies → local catalog
+/**
+ * 1. GET /movies
+ * Returns the local catalog (original 100 movies)
+ */
 async function getAllMovies(req, res) {
   try {
     const movies = await prisma.movie.findMany({
       where: {
-        id: { lte: 100 } // Filters only your original 100 movies
+        id: { lte: 100 } 
       },
       orderBy: { id: 'asc' },
     });
@@ -26,11 +28,12 @@ async function getAllMovies(req, res) {
   }
 }
 
-// Search TMDB Proxy
+/**
+ * 2. GET /search
+ * Proxies requests to TMDB for external movie discovery
+ */
 async function searchTMDB(req, res) {
   const { query } = req.query;
-  
-  // Ensure this variable matches your .env key (e.g., TMDB_TOKEN=your_32_char_key)
   const apiKey = process.env.TMDB_TOKEN ? process.env.TMDB_TOKEN.trim() : null;
 
   if (!query) return res.json([]);
@@ -38,31 +41,65 @@ async function searchTMDB(req, res) {
   try {
     const response = await axios.get('https://api.themoviedb.org/3/search/movie', {
       params: {
-        api_key: apiKey,   // Short key MUST be passed here, not in headers
+        api_key: apiKey,
         query: query,
         include_adult: false,
         language: 'en-US',
         page: 1
       },
-      httpsAgent,         // Reuses connection to avoid socket hang-ups
-      timeout: 10000      // Gives TMDB enough time to respond
+      httpsAgent,
+      timeout: 10000
     });
 
     res.json(response.data.results || []);
   } catch (err) {
-    // Log detailed error to debug "Invalid API Key" or "ECONNRESET" issues
     console.error("TMDB Proxy Error Detail:", err.response?.data || err.message);
-    
-    if (err.code === 'ECONNRESET') {
-        console.warn("🔄 Connection Reset. Reusing the httpsAgent should minimize this.");
+    // Return empty array instead of 500 to prevent frontend UI from breaking
+    res.status(200).json([]); 
+  }
+}
+
+/**
+ * 3. POST /movies
+ * Syncs a TMDB movie to the local database
+ * Crucial for the "Add to Playlist" functionality from Search
+ */
+async function syncMovie(req, res) {
+  const { tmdbId, title, description, year, posterUrl } = req.body;
+  
+  try {
+    if (!tmdbId) {
+      return res.status(400).json({ message: "tmdbId is required for syncing" });
     }
 
-    // Return an empty array so the frontend doesn't crash on errors
-    res.status(200).json([]); 
+    // Check if movie already exists locally
+    let movie = await prisma.movie.findUnique({ 
+      where: { tmdbId: parseInt(tmdbId) } 
+    });
+
+    if (!movie) {
+      // If it doesn't exist, create it in our local DB
+      movie = await prisma.movie.create({
+        data: { 
+          tmdbId: parseInt(tmdbId), 
+          title, 
+          description: description || "No description available", 
+          year: year ? parseInt(year) : null, 
+          posterUrl 
+        }
+      });
+    }
+    
+    // Return the movie (either found or newly created) so frontend has the local ID
+    res.status(200).json(movie);
+  } catch (error) {
+    console.error("Sync Error:", error);
+    res.status(500).json({ message: "Error syncing movie to local database", error: error.message });
   }
 }
 
 module.exports = {
   getAllMovies,
   searchTMDB,
+  syncMovie,
 };
