@@ -3,7 +3,7 @@ services:
     name: ml-service
     env: docker
     dockerfilePath: ./ml_service/Dockerfile
-    dockerContext: ./ml_service
+    dockerContext: .
     plan: free
 
   - type: web

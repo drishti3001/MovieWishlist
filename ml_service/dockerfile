@@ -13,7 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Step 5: This is the "Smart" Move
 # We copy everything into a folder NAMED 'ml_service' inside '/app'
 # This satisfies your code's "from ml_service.database" imports
-COPY . ./ml_service/
+COPY ml_service ./ml_service
+COPY backend/dev.db ./dev.db
 
 # Step 6: Package marker
 RUN touch __init__.py
