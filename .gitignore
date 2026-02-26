@@ -8,14 +8,6 @@ frontend/node_modules/
 backend/.env
 frontend/.env
 
-# database
-# We ignore the local DB so each environment (Local vs Docker) starts fresh
-dev.db
-dev.db-journal
-backend/prisma/dev.db
-backend/dev.db
-*.db
-*.db-journal
 
 # Prisma
 /backend/node_modules/.prisma
