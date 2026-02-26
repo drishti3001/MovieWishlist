@@ -130,8 +130,8 @@ The project is deployed on **Render** using Docker.
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone <your-repo-url>
-cd <repo-name>
+git clone https://github.com/drishti3001/MovieWishlist.git
+cd MovieWishlist
 ```
 
 ### 2️⃣ Run with Docker Compose
