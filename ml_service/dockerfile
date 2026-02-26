@@ -1,25 +1,21 @@
 FROM python:3.9-slim
 
-# Set the internal container path
-WORKDIR /ml_service
+# Set working directory
+WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
 
-# Step 4: Root is /ml_service, so requirements.txt is right here
-COPY requirements.txt .
+# Copy requirements from ml_service folder
+COPY ml_service/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Step 5: This is the "Smart" Move
-# We copy everything into a folder NAMED 'ml_service' inside '/app'
-# This satisfies your code's "from ml_service.database" imports
+# Copy ML service code
 COPY ml_service ./ml_service
-COPY backend/dev.db ./dev.db
 
-# Step 6: Package marker
-RUN touch __init__.py
+# Copy backend database
+COPY backend/dev.db ./dev.db
 
 EXPOSE 8000
 
-# Step 8: Run from /app so it sees the 'ml_service' folder
 CMD ["uvicorn", "ml_service.app:app", "--host", "0.0.0.0", "--port", "8000"]
