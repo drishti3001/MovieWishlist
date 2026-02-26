@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ml-service
+    env: docker
+    dockerfilePath: ./ml_service/Dockerfile
+    plan: free
+
+  - type: web
+    name: backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    envVars:
+      - key: RECOMMENDATION_SERVICE_URL
+        value: http://ml-service.onrender.com
+      - key: CLIENT_ORIGIN
+        value: https://frontend.onrender.com
+
+  - type: web
+    name: frontend
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    plan: free
