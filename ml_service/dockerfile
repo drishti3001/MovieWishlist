@@ -1,22 +1,24 @@
-# 1. Use an official Python runtime
 FROM python:3.9-slim
 
-# 2. Set the working directory to /app
+# Set the internal container path
 WORKDIR /app
 
-# 3. Install build dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
 
-# 4. Copy requirements from the current folder (ml_service) and install
+# Step 4: Root is /ml_service, so requirements.txt is right here
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Copy all files from the current folder (ml_service) into /app
-COPY . .
+# Step 5: This is the "Smart" Move
+# We copy everything into a folder NAMED 'ml_service' inside '/app'
+# This satisfies your code's "from ml_service.database" imports
+COPY . ./ml_service/
 
-# 6. Expose the port
+# Step 6: Package marker
+RUN touch __init__.py
+
 EXPOSE 8000
 
-# 7. Start uvicorn. 
-# Since app.py is now directly in /app, we use "app:app"
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Step 8: Run from /app so it sees the 'ml_service' folder
+CMD ["uvicorn", "ml_service.app:app", "--host", "0.0.0.0", "--port", "8000"]
