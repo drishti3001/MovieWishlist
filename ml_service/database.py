@@ -4,7 +4,7 @@ import pandas as pd
 import sqlite3
 
 # Existing backend SQLite database. Do not create a new database.
-DB_PATH = Path("/database/dev.db")
+DB_PATH = Path(__file__).parent / "dev.db"
 
 
 def get_database_path() -> Path:
