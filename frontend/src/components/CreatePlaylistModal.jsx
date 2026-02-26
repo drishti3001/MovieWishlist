@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './modal.css';
+import { API_ENDPOINTS } from '../api';
 
 function CreatePlaylistModal({ isOpen, onClose, onSuccess }) {
   const [name, setName] = useState("");
@@ -12,7 +13,7 @@ function CreatePlaylistModal({ isOpen, onClose, onSuccess }) {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:4000/playlists", {
+      const res = await fetch(API_ENDPOINTS.PLAYLISTS, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

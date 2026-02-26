@@ -1,6 +1,7 @@
 import { AnimatePresence, motion as Motion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import { FiPlus, FiX } from "react-icons/fi"
+import { API_ENDPOINTS } from '../api';
 
 function SearchResultCard({ movie, playlists = [], onToast }) {
   const [showDropdown, setShowDropdown] = useState(false)
@@ -21,7 +22,7 @@ function SearchResultCard({ movie, playlists = [], onToast }) {
 
     try {
       // 1. Sync TMDB movie to local DB first
-      const movieRes = await fetch(`http://localhost:4000/movies`, {
+      const movieRes = await fetch(API_ENDPOINTS.MOVIES, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -39,7 +40,7 @@ function SearchResultCard({ movie, playlists = [], onToast }) {
       const localMovieId = movieData.id;
 
       // 2. Now add to playlist using local ID
-      const res = await fetch(`http://localhost:4000/playlists/${playlist.id}/add`, {
+      const res = await fetch(API_ENDPOINTS.ADD_TO_PLAYLIST(playlist.id), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ movieId: localMovieId }),
@@ -108,7 +109,7 @@ function SearchResultsPage({ query, onClose, playlists = [] }) {
       setLoading(true)
       const token = localStorage.getItem("token")
       try {
-        const res = await fetch(`http://localhost:4000/search?query=${encodeURIComponent(query)}`, {
+        const res = await fetch(API_ENDPOINTS.SEARCH(query), {
           headers: { Authorization: `Bearer ${token}` }
         })
         const data = await res.json()

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FiPlus, FiTrash2 } from 'react-icons/fi'; // Ensure react-icons is installed
 import CreatePlaylistModal from './CreatePlaylistModal';
 import './Sidebar.css';
+import { API_ENDPOINTS } from '../api';
 
 function Sidebar({ isOpen, onClose }) {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ function Sidebar({ isOpen, onClose }) {
         const token = localStorage.getItem("token");
         if (!token) return;
         try {
-            const res = await fetch("http://localhost:4000/playlists", {
+            const res = await fetch(API_ENDPOINTS.PLAYLISTS, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
@@ -32,7 +33,7 @@ function Sidebar({ isOpen, onClose }) {
         
         const token = localStorage.getItem("token");
         try {
-            await fetch(`http://localhost:4000/playlists/${id}`, {
+            await fetch(API_ENDPOINTS.DELETE_PLAYLIST(id), {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` }
             });

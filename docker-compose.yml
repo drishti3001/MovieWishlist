@@ -1,0 +1,38 @@
+services:
+  ml-service:
+    build: ./ml_service
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      # Change the target to /database to avoid overwriting your code in /app
+      - ./backend:/database 
+    restart: always
+
+  backend:
+    build: ./backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      # Map your Mac's dev.db to BOTH possible internal paths to be safe
+      - ./backend/dev.db:/app/dev.db
+      - ./backend/dev.db:/app/prisma/dev.db
+    environment:
+      - RECOMMENDATION_SERVICE_URL=http://ml-service:8000
+      - CLIENT_ORIGIN=http://localhost
+    depends_on:
+      - ml-service
+    restart: always
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # This MUST be your Mac's address since the browser (not Docker) calls it
+        - VITE_API_URL=http://localhost:4000
+    ports:
+      - "80:80"
+    depends_on:
+      - backend

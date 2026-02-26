@@ -1,6 +1,7 @@
 import { AnimatePresence, motion as Motion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import { FiPlus } from "react-icons/fi"
+import { API_ENDPOINTS } from '../api';
 
 function MovieCard({ movie, playlists, onCardClick, onToast }) {
   const [showDropdown, setShowDropdown] = useState(false)
@@ -24,7 +25,7 @@ function MovieCard({ movie, playlists, onCardClick, onToast }) {
     if (!token) return
 
     try {
-      const res = await fetch(`http://localhost:4000/playlists/${playlist.id}/add`, {
+      const res = await fetch(API_ENDPOINTS.ADD_TO_PLAYLIST(playlist.id), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

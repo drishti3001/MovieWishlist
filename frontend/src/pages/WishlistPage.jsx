@@ -5,6 +5,7 @@ import './dashboard.css';
 import { FiEdit2, FiMoreVertical, FiInfo } from "react-icons/fi";
 import { HiOutlineTrash } from "react-icons/hi";
 import { FaStar } from "react-icons/fa";
+import { API_ENDPOINTS } from '../api';
 
 function WishlistPage() {
     const navigate = useNavigate();
@@ -29,7 +30,7 @@ function WishlistPage() {
         setEditingId(null);
 
         try {
-            const res = await fetch(`http://localhost:4000/playlists/${playlistId}/movies`, {
+            const res = await fetch(API_ENDPOINTS.PLAYLIST_MOVIES(playlistId), {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -46,7 +47,6 @@ function WishlistPage() {
             const data = await res.json();
             setPlaylistName(data?.name || "Playlist");
             
-            // ✅ Fix: Properly mapping flattened diary data from backend
             setWatchlist(
                 Array.isArray(data?.movies)
                     ? data.movies.map((item) => ({
@@ -94,7 +94,7 @@ function WishlistPage() {
     const remove = async (movieId) => {
         setInfoOpenId(null);
         const token = localStorage.getItem("token");
-        await fetch(`http://localhost:4000/playlists/${playlistId}/movies/${movieId}`, {
+        await fetch(API_ENDPOINTS.DELETE_MOVIE_FROM_PLAYLIST(playlistId, movieId), {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -111,7 +111,7 @@ function WishlistPage() {
 
     const saveUpdate = async (item) => {
         const token = localStorage.getItem("token");
-        await fetch(`http://localhost:4000/watchlist/${item.movieId}`, {
+        await fetch(API_ENDPOINTS.WATCHLIST_UPDATE(item.movieId), {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",

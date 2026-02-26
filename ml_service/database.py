@@ -4,7 +4,7 @@ import pandas as pd
 import sqlite3
 
 # Existing backend SQLite database. Do not create a new database.
-DB_PATH = (Path(__file__).resolve().parent / "../backend/dev.db").resolve()
+DB_PATH = Path("/database/dev.db")
 
 
 def get_database_path() -> Path:
@@ -30,3 +30,8 @@ def get_interactions() -> pd.DataFrame:
     interactions["score"] = interactions["status_score"] + interactions["rating"]
 
     return interactions
+def get_all_movie_ids() -> list[int]:
+    query = "SELECT id FROM Movie ORDER BY id ASC LIMIT 50" # Pull top 50 as global defaults
+    with sqlite3.connect(DB_PATH) as connection:
+        df = pd.read_sql_query(query, connection)
+    return df["id"].tolist()

@@ -2,6 +2,7 @@ import "./auth.css"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { GoogleLogin } from "@react-oauth/google"
+import { API_ENDPOINTS } from '../api';
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -16,7 +17,7 @@ function LoginPage() {
     setLoading(true)
 
     try {
-      const res = await fetch("http://localhost:4000/login", {
+      const res = await fetch(API_ENDPOINTS.LOGIN,{
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -47,7 +48,7 @@ function LoginPage() {
   const handleGoogleSuccess = async (credentialResponse) => {
     setError("")
     try {
-      const res = await fetch("http://localhost:4000/google", {
+      const res = await fetch(API_ENDPOINTS.GOOGLE_AUTH, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

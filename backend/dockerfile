@@ -1,0 +1,27 @@
+# 1. Use an official Node.js runtime as the base image
+FROM node:22-slim
+
+# 2. Install OpenSSL (Required for Prisma to run on Linux)
+RUN apt-get update -y && apt-get install -y openssl
+
+# 3. Set the working directory inside the container
+WORKDIR /app
+
+# 4. Copy package files first (to cache dependencies)
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# 5. Install dependencies
+RUN npm install
+
+# 6. Generate Prisma Client
+RUN npx prisma generate
+
+# 7. Copy the rest of your backend code
+COPY . .
+
+# 8. Expose the port your backend runs on
+EXPOSE 4000
+
+# 9. Start-up script: Run migrations and then start the server
+CMD ["node", "src/index.js"]
