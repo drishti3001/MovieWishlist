@@ -3,12 +3,14 @@ services:
     name: ml-service
     env: docker
     dockerfilePath: ./ml_service/Dockerfile
+    dockerContext: ./ml_service
     plan: free
 
   - type: web
     name: backend
     env: docker
     dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     plan: free
     envVars:
       - key: RECOMMENDATION_SERVICE_URL
@@ -20,4 +22,5 @@ services:
     name: frontend
     env: docker
     dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
     plan: free
