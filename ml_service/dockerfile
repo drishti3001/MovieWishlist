@@ -7,20 +7,16 @@ WORKDIR /app
 # 3. Install build dependencies
 RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
 
-# 4. Copy requirements and install
+# 4. Copy requirements from the current folder (ml_service) and install
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Copy everything into a subfolder named 'ml_service' 
-# This preserves the "ml_service.recommender" import path
-COPY . ./ml_service/
+# 5. Copy all files from the current folder (ml_service) into /app
+COPY . .
 
-# 6. Create an empty __init__.py in the root so /app is a package
-RUN touch __init__.py
-
-# 7. Expose the port
+# 6. Expose the port
 EXPOSE 8000
 
-# 8. Start uvicorn from the root
-# We point it to ml_service.app:app so it finds the file inside the folder
-CMD ["uvicorn", "ml_service.app:app", "--host", "0.0.0.0", "--port", "8000"]
+# 7. Start uvicorn. 
+# Since app.py is now directly in /app, we use "app:app"
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
